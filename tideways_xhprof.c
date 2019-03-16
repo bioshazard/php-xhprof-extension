@@ -29,6 +29,17 @@ PHP_FUNCTION(tideways_xhprof_enable)
         return;
     }
 
+
+    
+
+
+
+
+
+
+
+
+
     tracing_begin(flags TSRMLS_CC);
     tracing_enter_root_frame(TSRMLS_C);
 }
@@ -46,7 +57,7 @@ PHP_GINIT_FUNCTION(tideways_xhprof)
 {
 #if defined(COMPILE_DL_TIDEWAYS_XHPROF) && defined(ZTS)
      ZEND_TSRMLS_CACHE_UPDATE();
-#endif 
+#endif
      tideways_xhprof_globals->root = NULL;
      tideways_xhprof_globals->callgraph_frames = NULL;
      tideways_xhprof_globals->frame_free_list = NULL;

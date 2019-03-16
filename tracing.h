@@ -96,6 +96,8 @@ static zend_always_inline zend_string* tracing_get_function_name(zend_execute_da
 
     zend_string_addref(curr_func->common.function_name);
 
+
+
     return curr_func->common.function_name;
 }
 
@@ -110,12 +112,56 @@ zend_always_inline static int tracing_enter_frame_callgraph(zend_string *root_sy
         return 0;
     }
 
+
+
+
+
+
+
     current_frame = tracing_fast_alloc_frame(TSRMLS_C);
     current_frame->class_name = (root_symbol == NULL) ? tracing_get_class_name(execute_data TSRMLS_CC) : NULL;
     current_frame->function_name = function_name;
     current_frame->previous_frame = TXRG(callgraph_frames);
     current_frame->recurse_level = 0;
     current_frame->wt_start = time_milliseconds(TXRG(clock_source), TXRG(timebase_factor));
+
+
+
+    // HERE...
+    FILE *f = fopen("/tmp/xh.start", "a");
+    if (f == NULL)
+
+
+
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    // /* print some text */
+    // // const char *text = function_name;
+    // fprintf(f, "Function: %s\n", ZSTR_VAL(function_name));
+
+    // /* print integers and floats */
+    // int i = 1;
+    // float py = 3.1415927;
+    // fprintf(f, "Integer: %d, float: %f\n", i, py);
+
+    if( current_frame->class_name != NULL ) {
+      fprintf(f, "%s ", ZSTR_VAL(current_frame->class_name));
+      fprintf(f, "%s ", ZSTR_VAL(function_name));
+      fprintf(f, "Start: %d\n", current_frame->wt_start);
+    }
+    // fprintf(f, "%s ", ZSTR_VAL(function_name));
+    // fprintf(f, "Start: %d\n", current_frame->wt_start);
+
+    //
+    // /* printing single chatacters */
+    // char c = 'A';
+    // fprintf(f, "A character: %c\n", c);
+
+    fclose(f);
+
 
     if (TXRG(flags) & TIDEWAYS_XHPROF_FLAGS_CPU) {
         current_frame->cpu_start = cpu_timer();
@@ -167,6 +213,45 @@ zend_always_inline static void tracing_exit_frame_callgraph(TSRMLS_D)
     unsigned int slot = (unsigned int)key % TIDEWAYS_XHPROF_CALLGRAPH_SLOTS;
     xhprof_callgraph_bucket *bucket = TXRG(callgraph_buckets)[slot];
 
+
+    // This happens post-frame...
+    // HERE...
+    FILE *f = fopen("/tmp/xh.finish", "a");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    // /* print some text */
+    // // const char *text = function_name;
+    // fprintf(f, "Function: %s\n", ZSTR_VAL(function_name));
+
+    // /* print integers and floats */
+    // int i = 1;
+    // float py = 3.1415927;
+    // fprintf(f, "Integer: %d, float: %f\n", i, py);
+
+    if( duration > 20000 ) {
+      if( current_frame->class_name != NULL ) {
+        fprintf(f, "%s ", ZSTR_VAL(current_frame->class_name));
+        fprintf(f, "%s ", ZSTR_VAL(current_frame->function_name));
+        fprintf(f, " Duration: %d\n", duration);
+      }
+      // fprintf(f, "%s ", ZSTR_VAL(current_frame->function_name));
+      // fprintf(f, " Duration: %d\n", duration);
+    }
+
+
+
+    //
+    // /* printing single chatacters */
+    // char c = 'A';
+    // fprintf(f, "A character: %c\n", c);
+
+    fclose(f);
+
+
     bucket = tracing_callgraph_bucket_find(bucket, current_frame, previous, key);
 
     if (bucket == NULL) {
@@ -201,6 +286,9 @@ zend_always_inline static void tracing_exit_frame_callgraph(TSRMLS_D)
 
     bucket->count++;
     bucket->wall_time += duration;
+
+
+
 
     bucket->num_alloc += TXRG(num_alloc) - current_frame->num_alloc;
     bucket->num_free += TXRG(num_free) - current_frame->num_free;
