@@ -28,18 +28,7 @@ PHP_FUNCTION(tideways_xhprof_enable)
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flags) == FAILURE) {
         return;
     }
-
-
     
-
-
-
-
-
-
-
-
-
     tracing_begin(flags TSRMLS_CC);
     tracing_enter_root_frame(TSRMLS_C);
 }
