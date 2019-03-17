@@ -126,43 +126,6 @@ zend_always_inline static int tracing_enter_frame_callgraph(zend_string *root_sy
     current_frame->wt_start = time_milliseconds(TXRG(clock_source), TXRG(timebase_factor));
 
 
-
-    // HERE...
-    FILE *f = fopen("/tmp/xh.start", "a");
-    if (f == NULL)
-
-
-
-    {
-        printf("Error opening file!\n");
-        exit(1);
-    }
-
-    // /* print some text */
-    // // const char *text = function_name;
-    // fprintf(f, "Function: %s\n", ZSTR_VAL(function_name));
-
-    // /* print integers and floats */
-    // int i = 1;
-    // float py = 3.1415927;
-    // fprintf(f, "Integer: %d, float: %f\n", i, py);
-
-    if( current_frame->class_name != NULL ) {
-      fprintf(f, "%s ", ZSTR_VAL(current_frame->class_name));
-      fprintf(f, "%s ", ZSTR_VAL(function_name));
-      fprintf(f, "Start: %d\n", current_frame->wt_start);
-    }
-    // fprintf(f, "%s ", ZSTR_VAL(function_name));
-    // fprintf(f, "Start: %d\n", current_frame->wt_start);
-
-    //
-    // /* printing single chatacters */
-    // char c = 'A';
-    // fprintf(f, "A character: %c\n", c);
-
-    fclose(f);
-
-
     if (TXRG(flags) & TIDEWAYS_XHPROF_FLAGS_CPU) {
         current_frame->cpu_start = cpu_timer();
     }
@@ -200,6 +163,50 @@ zend_always_inline static int tracing_enter_frame_callgraph(zend_string *root_sy
     /* Init current function's recurse level */
     current_frame->recurse_level = recurse_level;
 
+
+
+
+
+    // HERE...
+    FILE *f = fopen("/dev/shm/xh.start", "a");
+    if (f == NULL)
+
+
+
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    // /* print some text */
+    // // const char *text = function_name;
+    // fprintf(f, "Function: %s\n", ZSTR_VAL(function_name));
+
+    // /* print integers and floats */
+    // int i = 1;
+    // float py = 3.1415927;
+    // fprintf(f, "Integer: %d, float: %f\n", i, py);
+
+    if( current_frame->class_name != NULL ) {
+      fprintf(f, "%s ", ZSTR_VAL(current_frame->class_name));
+      fprintf(f, "%s ", ZSTR_VAL(function_name));
+      fprintf(f, "Start: %d\n", current_frame->wt_start);
+    }
+
+    // fprintf(f, "%s ", ZSTR_VAL(function_name));
+    // fprintf(f, "Start: %d\n", current_frame->wt_start);
+
+    //
+    // /* printing single chatacters */
+    // char c = 'A';
+    // fprintf(f, "A character: %c\n", c);
+
+    fclose(f);
+
+
+
+
+
     return 1;
 }
 
@@ -216,7 +223,7 @@ zend_always_inline static void tracing_exit_frame_callgraph(TSRMLS_D)
 
     // This happens post-frame...
     // HERE...
-    FILE *f = fopen("/tmp/xh.finish", "a");
+    FILE *f = fopen("/dev/shm/xh.finish", "a");
     if (f == NULL)
     {
         printf("Error opening file!\n");
@@ -232,11 +239,15 @@ zend_always_inline static void tracing_exit_frame_callgraph(TSRMLS_D)
     // float py = 3.1415927;
     // fprintf(f, "Integer: %d, float: %f\n", i, py);
 
-    if( duration > 20000 ) {
+    // TODO:
+    // Show database queries and redis and outbound
+
+    if( duration > 1000000 ) {
       if( current_frame->class_name != NULL ) {
+        fprintf(f, "Start: %d, ", current_frame->wt_start);
         fprintf(f, "%s ", ZSTR_VAL(current_frame->class_name));
         fprintf(f, "%s ", ZSTR_VAL(current_frame->function_name));
-        fprintf(f, " Duration: %d\n", duration);
+        fprintf(f, "Duration: %d\n", duration);
       }
       // fprintf(f, "%s ", ZSTR_VAL(current_frame->function_name));
       // fprintf(f, " Duration: %d\n", duration);
